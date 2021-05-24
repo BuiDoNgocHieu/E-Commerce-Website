@@ -1,6 +1,8 @@
-import { Grid } from '@material-ui/core'
-import React from 'react'
+import { Grid, TextField } from '@material-ui/core'
+import React, { useState } from 'react'
+import { useHistory } from 'react-router'
 import styled from "styled-components"
+import APICaller from '../utils/callApi'
 
 const LoginStyled = styled.div`
 img{
@@ -38,20 +40,14 @@ border-bottom: 2px solid #00000038;
 const UserStyled = styled.div`
 margin-top: 2rem;
 
-.input{
-    /* margin-top: 1rem; */
-  width: 26rem;
-  height: 45px;
-  border: none;
+#outlined{
+    width: 26rem;
   outline: none;
   font-size: 17px;
   font-weight: bold;
   cursor: pointer;
-  border-radius: 15px;
-  /* background: #ffffff; */
-  background: transparent;
-  text-shadow: 1px 1px 0 #ffffff;
-  box-shadow: 2px 2px 5px #babecc, -5px -5px 10px #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 8px #babecc, -5px -5px 10px #ffffff;
   display: inline-flex;
   padding-left: 25px;
 }
@@ -65,7 +61,6 @@ margin-top: 2rem;
     display: flex;
     justify-content:center;
     text-decoration: none;
-    margin-top: 1rem
 }
 .btn{
     margin-top: 1rem;
@@ -84,11 +79,29 @@ margin-top: 2rem;
 `
 
 function Login() {
+    const [state, setState] = useState({ email: "", password: "" })
+    const router = useHistory();
+
+    const handleOnChange = (e) => {
+        setState((prev) => {
+            return { ...prev, [e.target.name]: e.target.value }
+        });
+    }
+    const handleSubmit = async () => {
+        const result = await APICaller("auth/login", "POST", { ...state })
+        if (result.status) {
+            console.log(result)
+            localStorage.setItem("accessToken", result.data.accessToken)
+
+            // router.push("/");
+        }
+    }
+
     return (
         <LoginStyled>
             <Grid container>
                 <Grid item md={6}>
-                    <img src="https://image.freepik.com/free-vector/sign-concept-illustration_114360-125.jpg?fbclid-IwAR1v8JvdXsE0tDWIgB1DSDCHRcBX9_j5vJKXd8M0axCB6s6dxJHAXkyw" />
+                    <img src="https://businesstemplates.co.nz/wp-content/uploads/2020/12/login-concept-illustration_114360-739.jpg" />
                 </Grid>
                 <Grid item md={6}>
                     <RightPartStyled>
@@ -97,10 +110,29 @@ function Login() {
                             <p className="alreadyHave">Don't have an account?<a className="signup" href="/signup">Sign Up</a></p>
                         </HeaderStyled>
                         <UserStyled>
-                            <input className="input" type="text" placeholder="Email Address"></input>
-                            <input className="input pass" type="password" placeholder="Password"></input>
-                            <a className="Forgotpassword" href="">Quên mật khẩu</a>
-                            <button className="btn">Log In</button>
+                            <TextField
+                                id="outlined"
+                                label="Email Address"
+                                variant="outlined"
+                                style={{ marginBottom: "2rem" }}
+                                type="text"
+                                value={state.email}
+                                name="email"
+                                onChange={handleOnChange}>
+                            </TextField>
+                            <TextField
+                                id="outlined"
+                                label="Password"
+                                variant="outlined"
+                                style={{ marginBottom: "2rem" }}
+                                type="password"
+                                value={state.password}
+                                name="password"
+                                onChange={handleOnChange}>
+                            </TextField>
+
+                            <a className="Forgotpassword" href="/">Quên mật khẩu</a>
+                            <button className="btn" onClick={() => handleSubmit()}>Log In</button>
                         </UserStyled>
                     </RightPartStyled>
                 </Grid>
